@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bloom / Release — Mark Walhimer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #0a0a0a;
+      --gray: #888;
+      --light: #e8e8e8;
+      --bg: #f9f9f7;
+    }
+
+    html { font-size: 16px; }
+
+    body {
+      background: var(--bg);
+      color: var(--black);
+      font-family: "Georgia", "Times New Roman", serif;
+      line-height: 1.65;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 40px;
+      background: rgba(249,249,247,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--light);
+    }
+
+    nav .logo {
+      font-family: -apple-system, "Helvetica Neue", sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gray);
+      text-decoration: none;
+    }
+
+    nav .nav-links {
+      display: flex;
+      gap: 28px;
+      list-style: none;
+    }
+
+    nav .nav-links a {
+      font-family: -apple-system, "Helvetica Neue", sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gray);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    nav .nav-links a:hover { color: var(--black); }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 140px 40px 80px;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .genre-line {
+      font-family: -apple-system, "Helvetica Neue", sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 32px;
+    }
+
+    h1 {
+      font-size: clamp(42px, 7vw, 72px);
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin-bottom: 36px;
+    }
+
+    h1 em {
+      font-style: italic;
+      font-weight: 300;
+    }
+
+    .opening {
+      font-size: 17px;
+      line-height: 1.75;
+      color: #333;
+      max-width: 640px;
+      margin-bottom: 48px;
+    }
+
+    .opening strong { font-weight: 600; color: var(--black); }
+
+    /* ── LIVE WORK FRAME ── */
+    .work-section {
+      padding: 0 0 80px;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding-left: 40px;
+      padding-right: 40px;
+    }
+
+    .frame-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: #fff;
+      border: 1px solid var(--light);
+      overflow: hidden;
+    }
+
+    .frame-wrap iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .frame-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(249,249,247,0);
+      transition: background 0.3s;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .frame-overlay:hover {
+      background: rgba(249,249,247,0.12);
+    }
+
+    .frame-label {
+      margin-top: 12px;
+      font-family: -apple-system, "Helvetica Neue", sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gray);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .live-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    .live-btn {
+      display: inline-block;
+      margin-top: 20px;
+      font-family: -apple-system, "Helvetica Neue", sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--black);
+      text-decoration: none;
+      border-bottom: 1px solid var(--black);
+      padding-bottom: 2px;
+      transition: opacity 0.2s;
+    }
+
+    .live-btn:hover { opacity: 0.5; }
+
+    /* ── STATS ROW ── */
+    .stats {
+      display: flex;
+      gap: 0;
+      border-top: 1px solid var(--light);
+      border-bottom: 1px solid var(--light);
+      margin: 80px 40px;
+      max-width: 820px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .stat {
+      flex: 1;
+      padding: 28px 0;
+      border-right: 1px solid var(--light);
+      text-align: center;
+    }
+
+    .stat:last-child { border-right: none; }
+
+    .stat-number {
+      font-size: 32px;
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-family: -apple-system, "Helvetica Neue", sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gray);
+    }
+
+    /* ── PROCESS ── */
+    .section {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 40px 80px;
+    }
+
+    .section-label {
+      font-family: -apple-system, "Helvetica Neue", sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 40px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--light);
+    }
+
+    .process-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 40px 32px;
+    }
+
+    .process-step {}
+
+    .step-num {
+      font-family: -apple-system, "Helvetica Neue", sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--gray);
+      margin-bottom: 10px;
+    }
+
+    .step-title {
+      font-size: 18px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+    }
+
+    .step-body {
+      font-family: -apple-system, "Helvetica Neue", sans-serif;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #555;
+    }
+
+    /* ── CONCEPT ── */
+    .concept-body {
+      font-size: 17px;
+      line-height: 1.8;
+      color: #333;
+      max-width: 640px;
+      margin-bottom: 32px;
+    }
+
+    .pull-quote {
+      font-size: 21px;
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.5;
+      color: var(--black);
+      border-left: 2px solid var(--black);
+      padding-left: 24px;
+      margin: 48px 0;
+      max-width: 580px;
+    }
+
+    /* ── TECHNICAL ── */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      margin-top: 32px;
+    }
+
+    .tech-col h3 {
+      font-family: -apple-system, "Helvetica Neue", sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 16px;
+    }
+
+    .tech-col ul {
+      list-style: none;
+    }
+
+    .tech-col li {
+      font-family: -apple-system, "Helvetica Neue", sans-serif;
+      font-size: 13px;
+      color: #444;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--light);
+      line-height: 1.4;
+    }
+
+    .tech-col li:last-child { border-bottom: none; }
+
+    /* ── BIO ── */
+    .bio-section {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 0 40px 120px;
+      border-top: 1px solid var(--light);
+      padding-top: 60px;
+      display: flex;
+      gap: 60px;
+      align-items: flex-start;
+    }
+
+    .bio-name {
+      font-family: -apple-system, "Helvetica Neue", sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 14px;
+    }
+
+    .bio-text {
+      font-family: -apple-system, "Helvetica Neue", sans-serif;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #444;
+      max-width: 500px;
+    }
+
+    .bio-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 120px;
+    }
+
+    .bio-links a {
+      font-family: -apple-system, "Helvetica Neue", sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gray);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .bio-links a:hover { color: var(--black); }
+
+    /* ── SCROLL REVEAL ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .hero, .section, .work-section { padding-left: 20px; padding-right: 20px; }
+      .stats { margin-left: 20px; margin-right: 20px; }
+      .tech-grid { grid-template-columns: 1fr; }
+      .bio-section { flex-direction: column; gap: 32px; padding: 40px 20px 80px; }
+      h1 { font-size: 36px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="logo" href="https://walhimer.github.io/art/">Mark Walhimer</a>
+    <ul class="nav-links">
+      <li><a href="https://walhimer.github.io/art/">Works</a></li>
+      <li><a href="https://walhimer.github.io/art/bloom_release.html" target="_blank">Live Work</a></li>
+      <li><a href="https://www.mark-walhimer.com/">Studio</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <p class="genre-line">Generative Art &nbsp;/&nbsp; Autonomous System &nbsp;/&nbsp; 2025–2026</p>
+    <h1>Bloom &nbsp;/ <em>Release</em></h1>
+    <div class="opening">
+      <p>Twenty-two blooms appear, one by one. Each grows at its own pace, breathes, and holds. Then, slowly, they begin to go.</p>
+      <br>
+      <p>You did not plant them. You cannot stop them. The garden does not wait for you — <strong>it has its own arc.</strong></p>
+      <br>
+      <p>The work runs in a single loop: emergence, fullness, dissolution. Then it begins again. No two cycles are the same.</p>
+    </div>
+    <a class="live-btn" href="https://walhimer.github.io/art/bloom_release.html" target="_blank">Open live work ↗</a>
+  </section>
+
+  <!-- LIVE WORK -->
+  <div class="work-section reveal">
+    <div class="frame-wrap">
+      <iframe src="https://walhimer.github.io/art/bloom_release.html" title="Bloom / Release" loading="lazy" scrolling="no"></iframe>
+      <a class="frame-overlay" href="https://walhimer.github.io/art/bloom_release.html" target="_blank"></a>
+    </div>
+    <div class="frame-label">
+      <span class="live-dot"></span>
+      Running live — click to open full screen
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats reveal">
+    <div class="stat">
+      <span class="stat-number">22</span>
+      <span class="stat-label">Blooms per cycle</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number">∞</span>
+      <span class="stat-label">Unique cycles</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number">0</span>
+      <span class="stat-label">Fixed outcomes</span>
+    </div>
+    <div class="stat">
+      <span class="stat-number">1</span>
+      <span class="stat-label">Unbroken arc</span>
+    </div>
+  </div>
+
+  <!-- PROCESS -->
+  <section class="section reveal">
+    <p class="section-label">Process</p>
+    <div class="process-grid">
+      <div class="process-step">
+        <p class="step-num">01</p>
+        <h2 class="step-title">Arrival</h2>
+        <p class="step-body">The first bloom appears. Then another. Each is seeded with its own color, scale, breath, and pace. The garden grows without asking permission.</p>
+      </div>
+      <div class="process-step">
+        <p class="step-num">02</p>
+        <h2 class="step-title">Fullness</h2>
+        <p class="step-body">At twenty-two, the garden holds. All blooms breathe together — expanding, contracting — for eight seconds of shared presence.</p>
+      </div>
+      <div class="process-step">
+        <p class="step-num">03</p>
+        <h2 class="step-title">Release</h2>
+        <p class="step-body">The oldest bloom begins to fade. Then the next. Dissolution moves in order of arrival — the first to come is the first to go.</p>
+      </div>
+      <div class="process-step">
+        <p class="step-num">04</p>
+        <h2 class="step-title">Return</h2>
+        <p class="step-body">When the last bloom disappears, the canvas clears. After a breath of white silence, the cycle begins again — different colors, different positions, the same arc.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONCEPT -->
+  <section class="section reveal">
+    <p class="section-label">Concept</p>
+    <p class="concept-body">
+      The garden is not a metaphor for death. It is a demonstration of arc. Things come. They reach fullness. They go. This is not tragedy — it is the basic condition of living things.
+    </p>
+    <p class="concept-body">
+      We spend most of our attention on arrival and presence. The bloom, the achievement, the moment of fullness. Bloom / Release asks you to stay for the rest of it. To watch the going. To notice that the going is as ordered and deliberate as the coming. That release has its own integrity.
+    </p>
+
+    <div class="pull-quote">
+      "The first to arrive is the first to go. There is no other order."
+    </div>
+
+    <p class="concept-body">
+      Each cycle takes a different form — different hues, different positions on the canvas, different pacing in each bloom. But the arc is always the same. Emergence. Fullness. Dissolution. Return. The work does not let you skip any of it.
+    </p>
+    <p class="concept-body">
+      Bloom / Release is the quieter companion to Surrender Machines. Where that work is mechanical, confrontational, driven by the three forces of anger, ego, and attachment — this one is organic, patient, inevitable. You cannot intervene. You can only watch what happens when something lives its full arc without interference.
+    </p>
+  </section>
+
+  <!-- TECHNICAL -->
+  <section class="section reveal">
+    <p class="section-label">Technical</p>
+    <div class="tech-grid">
+      <div class="tech-col">
+        <h3>Software</h3>
+        <ul>
+          <li>HTML Canvas — 2D rendering context</li>
+          <li>Vanilla JavaScript — no framework dependencies</li>
+          <li>HSB color engine — harmonic hue generation</li>
+          <li>Custom seeded random — unique per cycle</li>
+          <li>Radial gradient layering — translucency and depth</li>
+          <li>RequestAnimationFrame — smooth 60fps loop</li>
+        </ul>
+      </div>
+      <div class="tech-col">
+        <h3>Behavior</h3>
+        <ul>
+          <li>22 blooms — spawned at 1.8s intervals</li>
+          <li>8 second hold — full garden breathing together</li>
+          <li>Staggered fade — oldest first, 600ms offset</li>
+          <li>Life bar — single pixel progress, bottom of screen</li>
+          <li>Full reset — new seed, new cycle, same arc</li>
+          <li>Single file — runs in any browser, no install</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- BIO -->
+  <div class="bio-section reveal">
+    <div>
+      <p class="bio-name">Mark Walhimer</p>
+      <p class="bio-text">
+        Museum planner, industrial designer, generative artist. Twenty years designing interactive public spaces for the Smithsonian Institution, the Children's Museum of Indianapolis, and institutions across three continents. Author of <em>Museums 101</em> and <em>Designing Museum Experiences</em> (Bloomsbury). Fulbright Specialist. His generative practice grows from a career spent designing spaces that respond to the people inside them.
+      </p>
+    </div>
+    <div class="bio-links">
+      <a href="https://medium.com/@markwalhimer" target="_blank">Medium</a>
+      <a href="https://objkt.com" target="_blank">Objkt</a>
+      <a href="https://www.mark-walhimer.com/" target="_blank">Studio</a>
+      <a href="https://walhimer.github.io/art/" target="_blank">All Works</a>
+    </div>
+  </div>
+
+  <script>
+    // Scroll reveal
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    reveals.forEach(r => observer.observe(r));
+  </script>
+
+</body>
+</html>
