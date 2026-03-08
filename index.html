@@ -128,12 +128,6 @@
       display: block;
     }
 
-    .frame-wrap canvas {
-      width: 100% !important;
-      height: 100% !important;
-      display: block;
-    }
-
     .frame-overlay {
       position: absolute;
       inset: 0;
@@ -398,7 +392,7 @@
   
     /* ── Garden canvas ── */
 * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { background: #fff; overflow: hidden; height: 100%; width: 100%; }
+    html, body { background: #fff; }
     canvas { display: block; }
 
     /* life bar — bottom of screen, gray, grows left to right */
@@ -647,9 +641,8 @@ const ctx     = canvas.getContext('2d');
 const lifebar = document.getElementById('lifebar');
 
 function resize() {
-  const wrap = canvas.parentElement;
-  canvas.width  = wrap ? wrap.clientWidth  : window.innerWidth;
-  canvas.height = wrap ? wrap.clientHeight : window.innerHeight;
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
 }
 resize();
 window.addEventListener('resize', resize);
