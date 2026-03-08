@@ -6,7 +6,7 @@
   <title>Garden — Mark Walhimer</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { background: #000; overflow: hidden; height: 100%; width: 100%; }
+    html, body { background: #fff; overflow: hidden; height: 100%; width: 100%; }
     canvas { display: block; }
 
     /* life bar — bottom of screen, gray, grows left to right */
@@ -43,7 +43,7 @@
 <body>
 <div id="begin-overlay" style="
   position:fixed; inset:0; z-index:9999;
-  background:#000;
+  background:rgba(0,0,0,0.55);
   display:flex; flex-direction:column;
   align-items:center; justify-content:center;
   cursor:pointer;
@@ -52,9 +52,9 @@
     color:#fff;
     font-family: 'Georgia', serif;
     font-size: 1.1rem;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.25em;
     text-transform: uppercase;
-    opacity: 0.7;
+    opacity: 0.85;
   ">Click to begin</div>
 </div>
 <canvas id="c"></canvas>
@@ -121,6 +121,13 @@ function beginExperience() {
     overlay.style.opacity = '0';
     setTimeout(() => overlay.remove(), 800);
   }
+  // Restart garden fresh
+  blooms.length = 0;
+  spawnCount = 0;
+  cycleCount = 0;
+  phase = 'bloom';
+  phaseTimer = 0;
+  noteAssignments = shufflePool(rng);
   buildHorn();
 }
 document.getElementById('begin-overlay').addEventListener('click', beginExperience, { once: true });
