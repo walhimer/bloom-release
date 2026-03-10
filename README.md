@@ -2,7 +2,7 @@
 Mark Walhimer, 2026
 
 Live: https://walhimer.github.io/bloom-release/
-https://walhimer.github.io/bloom-release/bloom-four-walls.html
+- https://walhimer.github.io/bloom-release/bloom-four-walls.html
 
 ---
 
